@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Digital Garden</title>
+    <style>
+        /*
+         * PIXEL GARDEN STYLES (CSS)
+         */
+        body, html {
+            height: 100%;
+            margin: 0;
+            overflow: hidden; /* Prevent scrolling the soil */
+            background-color: #3e2723; /* fallback color */
+            font-family: 'Courier New', Courier, monospace; /* Pixel-style font */
+            user-select: none; /* Prevent text selection while tapping */
+        }
+
+        #garden-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            /* Tiled Pixel Soil Background */
+            background-image: url('imagetulips/grass.png');
+            background-repeat: repeat;
+            image-rendering: pixelated; /* Essential for pixel-art clarity */
+            cursor: pointer;
+        }
+
+        .planted-plot {
+            position: absolute;
+            width: 64px; /* Matches the sprite size */
+            height: 64px;
+            pointer-events: none; /* Clicks pass through to the garden */
+        }
+
+        .tulip-sprite {
+            width: 100%;
+            height: 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            image-rendering: pixelated;
+            
+            /* Initial state for the animation */
+            opacity: 0;
+            transform: scale(0.1) translateY(20px);
+            
+            /* The Blooming Animation */
+            animation: bloom 0.6s ease-out forwards;
+        }
+
+        /* * Keyframe Animation for Blooming
+         */
+        @keyframes bloom {
+            0% {
+                opacity: 0;
+                transform: scale(0.1) translateY(20px);
+            }
+            70% {
+                opacity: 1;
+                transform: scale(1.1) translateY(-5px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="garden-container">
+        <audio id="garden-music" loop autoplay controls>
+            <source src="audiotulips/always with me flute - spirited away.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        </div>
+
+    <script>
+        /*
+         * PIXEL GARDEN LOGIC (JavaScript)
+         */
+        const garden = document.getElementById('garden-container');
+        
+        // Define the locations (coordinates) of each tulip on the image_1.png asset sheet
+        // This maps 'tulipName' to its background-position in CSS.
+        const tulipSpritesMap = {
+            red: 'imagetulips/tulipred.png',
+            pink: 'imagetulips/tulippink.png',
+            yellow: 'imagetulips/tulipyellow.png',
+            purple: 'imagetulips/tulippurple.png',
+            orange: 'imagetulips/tuliporange.png'
+        };
+
+        const tulipColors = Object.keys(tulipSpritesMap);
+
+        // This function handles the tap/click event
+        garden.addEventListener('click', function(event) {
+            // Get the click coordinates relative to the garden container
+            const rect = garden.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            // Offset to center the 64x64 plot on the click point
+            const plotX = x - 32; 
+            const plotY = y - 32;
+
+            createTulip(plotX, plotY);
+        });
+
+        function createTulip(x, y, color) {
+            // Create the outer plot (container)
+            const plotDiv = document.createElement('div');
+            plotDiv.className = 'planted-plot';
+            plotDiv.style.left = x + 'px';
+            plotDiv.style.top = y + 'px';
+
+            // Create the actual tulip sprite
+            const tulipDiv = document.createElement('div');
+            tulipDiv.className = 'tulip-sprite';
+            
+            // 1. Choose a tulip color (random by default)
+            const tulipColor = color || tulipColors[Math.floor(Math.random() * tulipColors.length)];
+            
+            // 2. Set the correct tulip image
+            tulipDiv.style.backgroundImage = `url('${tulipSpritesMap[tulipColor]}')`;
+
+            // Assemble and add to the garden
+            plotDiv.appendChild(tulipDiv);
+            garden.appendChild(plotDiv);
+        }
+
+        // Example: place a fixed orange tulip (uncomment to use)
+        // createTulip(120, 170, 'orange');
+
+        // --- OPTIONAL: Initial instructions or message ---
+        const welcomeMessage = document.createElement('div');
+        welcomeMessage.style.position = 'absolute';
+        welcomeMessage.style.width = '100%';
+        welcomeMessage.style.textAlign = 'center';
+        welcomeMessage.style.top = '20px';
+        welcomeMessage.style.color = 'white';
+        welcomeMessage.style.pointerEvents = 'none';
+        welcomeMessage.innerHTML = '<h1>Tap anywhere to plant our garden.</h1>';
+        garden.appendChild(welcomeMessage);
+
+        // Auto-play music on page load
+        const audio = document.getElementById('garden-music');
+        audio.play().catch(function(error) {
+            console.log('Autoplay blocked by browser:', error);
+            // Music will play when user interacts with the page
+        });
+
+    </script>
+</body>
+</html>
